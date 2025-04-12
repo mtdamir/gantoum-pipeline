@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     jwt_algorithm: str
     jwt_access_token_expire_minutes: int
+    AIRFLOW_SECRET_KEY:str
 
     gantoum_product_url:str
 
