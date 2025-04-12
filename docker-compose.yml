@@ -17,7 +17,6 @@ services:
       - POSTGRES_PORT=${POSTGRES_PORT}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ALGORITHM=${JWT_ALGORITHM}
-      - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=${JWT_ACCESS_TOKEN_EXPIRE_MINUTES}
     volumes:
       - ./app:/app
     restart: unless-stopped
