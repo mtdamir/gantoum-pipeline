@@ -1,44 +1,32 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, model_validator
 from fastapi import HTTPException
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone
 from enums.user_enums import Roles
 
 class UserSchema(BaseModel):
-    id: Optional[int] = Field(default=None)
+    user_id: Optional[int] = None
     name: str = Field(..., min_length=3, max_length=50)
-    email: EmailStr = Field(...)
+    email: EmailStr
     password: str = Field(..., min_length=8)
-    role: Roles = Field(default=Roles.USER.value)
-    created_at: Optional[datetime] = Field(default_factory=datetime.now)
-    updated_at: Optional[datetime] = Field(default=None)
-    refresh_token: str = Field(default=None, nullable = True)
+    role: Roles = Roles.USER.value
+    created_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None
+    refresh_token: Optional[str] = None
 
-    @classmethod
-    def validate_user(cls, data):
-        if "created_at" not in data or data["created_at"] is None:
-            data["created_at"] = datetime.timezone.utc()
-
-        data["updated_at"] = datetime.timezone.utc()
-
-        if data["role"] not in [role.value for role in Roles]:
-            raise HTTPException(status_code=400, detail=["Invalid role."])
-
-        
-        if data.get(  "refresh_token") is None:
-            data.pop("refresh_token", None)
-        return cls(**data)
+    @model_validator(mode="after")
+    def validate_user(cls, values):
+        values["updated_at"] = datetime.now(timezone.utc)
+        if values["role"] not in Roles.__members__:
+            raise HTTPException(status_code=400, detail="Invalid role.")
+        return values
 
     class Config:
         schema_extra = {
             "example": {
-                "phone_number": "09120001122",
+                "name": "Ali Rezaei",
                 "email": "user@example.com",
                 "password": "yoursecurepassword",
-                "is_verified": False,
                 "role": "user"
             }
         }
-
-
-

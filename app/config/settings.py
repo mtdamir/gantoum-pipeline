@@ -1,4 +1,8 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 
 class Settings(BaseSettings):
     postgres_user: str
@@ -9,10 +13,11 @@ class Settings(BaseSettings):
 
     jwt_secret_key: str
     jwt_algorithm: str
-    AIRFLOW_SECRET_KEY:str
+    airflow_secret_key:str
 
     gantoum_product_url:str
 
-    model_config = SettingsConfigDict(env_file="./ .env", env_file_encoding="utf-8")
+    class Config:
+        env_file = ".env"
 
 settings = Settings()

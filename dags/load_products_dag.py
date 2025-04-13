@@ -10,6 +10,14 @@ import logging
 base_url = "https://gantoum.ir/Search/3/%D8%AF%D8%B3%D8%AA%D9%87-%D8%A8%D9%86%D8%AF%DB%8C-%D9%85%D8%AD%D8%B5%D9%88%D9%84%D8%A7%D8%AA?pageId={}&brands=&attributes=&hasSellingStock=false&startPrice=0&endPrice=1350000&sortBy="
 logger = logging.getLogger(__name__)
 
+def remove_text_from_price(price):
+    try:
+        return int(
+            price.replace("تومان", "").replace("هر عدد :", "").replace(",", "").strip()
+        )
+    except ValueError:
+        return None
+
 def scrape_products_from_url(**kwargs):
     def get_product_data_from_page(page_number):
         url = base_url.format(page_number)
@@ -65,12 +73,16 @@ def scrape_products_from_url(**kwargs):
     logger.info(f"Scraped {len(all_products)} products.")
     return all_products
 
+
 def save_to_json_file(ti, **kwargs):
     all_products = ti.xcom_pull(task_ids='scrape_products')
 
     if not all_products:
         logger.warning("No products to save to JSON.")
         return
+    
+    for product in all_products:
+        product['price'] = remove_text_from_price(product['price'])
 
 
     try:
@@ -82,38 +94,29 @@ def save_to_json_file(ti, **kwargs):
         logger.error(f"Error saving data to JSON: {e}")
         raise
 
+    return all_products
+
 def save_to_postgres_database(ti, **kwargs):
     postgres_hook = PostgresHook(postgres_conn_id='gantoum_postgres')
 
     create_table_query = """
-    CREATE TABLE IF NOT EXISTS public.products (
+    CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
-        price VARCHAR(50) NOT NULL,
+        price INTEGER NOT NULL,
         image_url TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """
 
-    truncate_table_query = """
-    TRUNCATE TABLE public.products RESTART IDENTITY;
-    """
-
     try:
-        logger.info("Setting search_path to public...")
-        postgres_hook.run("SET search_path TO public;")
-
-        logger.info("Creating table 'products' in public schema if it doesn't exist...")
+        logger.info("Creating table if not exists...")
         postgres_hook.run(create_table_query)
-
-        logger.info("Truncating table 'products' to remove old data...")
-        postgres_hook.run(truncate_table_query)
-
     except Exception as e:
-        logger.error(f"Error setting up the table: {e}")
+        logger.error(f"Error creating the table: {e}")
         raise
 
-    all_products = ti.xcom_pull(task_ids='scrape_products')
+    all_products = ti.xcom_pull(task_ids='save_to_json')
 
     if not all_products:
         logger.warning("No products to save to database.")
@@ -138,6 +141,7 @@ def save_to_postgres_database(ti, **kwargs):
     except Exception as e:
         logger.error(f"Error inserting data into database: {e}")
         raise
+
 
 with DAG(
     dag_id='load_products',
