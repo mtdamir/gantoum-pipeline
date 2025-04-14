@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import json
 import logging
 
+
 base_url = "https://gantoum.ir/Search/3/%D8%AF%D8%B3%D8%AA%D9%87-%D8%A8%D9%86%D8%AF%DB%8C-%D9%85%D8%AD%D8%B5%D9%88%D9%84%D8%A7%D8%AA?pageId={}&brands=&attributes=&hasSellingStock=false&startPrice=0&endPrice=1350000&sortBy="
 logger = logging.getLogger(__name__)
 

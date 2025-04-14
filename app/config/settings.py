@@ -1,23 +1,18 @@
 from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
-
-load_dotenv(override=True)
-
+import json
 
 class Settings(BaseSettings):
-    postgres_user: str
-    postgres_password: str
-    postgres_db: str
-    postgres_host: str
-    postgres_port: str
-
+    database_user: str
+    database_password: str
+    database_name: str
+    database_host: str
+    database_port: int
     jwt_secret_key: str
     jwt_algorithm: str
-    airflow_secret_key:str
-
-    gantoum_product_url:str
+    airflow_secret_key: str 
 
     class Config:
         env_file = ".env"
+        env_file_encoding = "utf-8"
 
 settings = Settings()
