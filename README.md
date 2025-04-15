@@ -15,8 +15,8 @@ Special attention has been given to security in the design of this project. This
 +----------------+       +-------------------------------------------+
 |     User       |       |              FastAPI Application          |
 |                |       |                                           |
-|  [HTTP Requests]----->|  +-------------------+                    |
-|                |       |  |     main.py      |                    |
+|  [HTTP Requests]----->|  +-------------------+                     |
+|                |       |  |     main.py      |                     |
 |                |       |  +-------------------+                    |
 |                |       |  | Routers           |                    |
 |                |       |  | - users_router.py |                    |
