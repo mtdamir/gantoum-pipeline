@@ -1,13 +1,15 @@
 import asyncpg
 import logging
+from contextlib import asynccontextmanager
 from config.settings import settings
 
 logger = logging.getLogger(__name__)
 
-async def connect_to_db():
-    global db_pool
+@asynccontextmanager
+async def get_postgres_connection():
+    pool = None
     try:
-        db_pool = await asyncpg.create_pool(
+        pool = await asyncpg.create_pool(
             host=settings.database_host,
             port=settings.database_port,
             user=settings.database_user,
@@ -16,15 +18,12 @@ async def connect_to_db():
             min_size=1,
             max_size=10,
         )
-        logger.info("Database pool created")
+        logger.info("Connected to PostgreSQL database.")
+        yield pool
     except Exception as e:
-        logger.error(f"Failed to create database pool: {e}")
+        logger.error(f"Error connecting to PostgreSQL database pool: {e}")
         raise e
-    
-async def close_db_connection():
-    await db_pool.close()
-    logger.info("Database pool closed")
-
-async def get_connection():
-    async with db_pool.acquire() as conn:
-        yield conn
+    finally:
+        if pool:
+            await pool.close()
+            logger.info("PostgreSQL database pool closed.")
