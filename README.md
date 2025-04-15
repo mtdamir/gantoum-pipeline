@@ -47,11 +47,11 @@ Special attention has been given to security in the design of this project. This
                         | - create_user_table.py    |       | - products      |
                         | - create_order_table.py   |       | - orders        |
                         +----------------------------+       +-----------------+
-                                    ^
-                                    | [Insert Data]
-                                    |
-                        +----------------------------+
-                        |          Airflow           |
-                        | - load_products_dag.py    |
-                        +----------------------------+
+                                                                      ^
+                                                               | [Insert Data]  |
+                                                                      |
+                                                        +----------------------------+
+                                                        |          Airflow           |
+                                                        |  - load_products_dag.py    |
+                                                        +----------------------------+    
 ```
