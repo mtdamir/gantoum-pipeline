@@ -8,7 +8,7 @@ class UserSchema(BaseModel):
     user_id: Optional[int] = None
     name: str = Field(..., min_length=3, max_length=50)
     email: str
-    password: str = Field(..., min_length=8)
+    phone_number: Optional[str] = None
     role: Roles = Roles.USER.value
     created_at: Optional[datetime] = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: Optional[datetime] = None

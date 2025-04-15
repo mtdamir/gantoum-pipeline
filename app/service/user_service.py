@@ -1,6 +1,6 @@
 import logging
 from fastapi import HTTPException
-from db.create_user_table import create_user, get_user_by_email, update_user_refresh_token
+from db.create_user_table import create_user, get_user_by_phone_number, update_user_refresh_token
 from schemas.user_schema import UserSchema, Roles
 from dtos.auth_dto import RegisterUserDto, LoginUserDto
 from jose import jwt
@@ -33,35 +33,36 @@ class UserService:
 
     async def register_user(self, register_user: RegisterUserDto) -> UserSchema:
         name = register_user.username
-        email = register_user.username
+        email = register_user.email
         password = register_user.password
+        phone_number = register_user.phone_number
 
-        existing_user = await get_user_by_email(email)
+        existing_user = await get_user_by_phone_number(phone_number)
         if existing_user:
-            raise HTTPException(status_code=400, detail="User with this email already registered")
+            raise HTTPException(status_code=400, detail="This user already registered")
 
         password_hash = self.get_password_hash(password)
 
         created_user = await create_user(
             name=name,
             email=email,
+            phone_number=phone_number,
             password_hash=password_hash,
             role=Roles.USER.value
         )
 
         return UserSchema(
-            user_id=created_user["user_id"],
             name=created_user["name"],
             email=created_user["email"],
-            password=password,  
+            phone_number=created_user["phone_number"],
             role=created_user["role"],
             created_at=created_user["created_at"]
         )
 
     async def login_user(self, login_user: LoginUserDto) -> dict:
-        email = login_user.username
+        phone_number = login_user.phone_number
 
-        user = await get_user_by_email(email)
+        user = await get_user_by_phone_number(phone_number)
         if not user:
             raise HTTPException(status_code=400, detail="Invalid credentials")
 
@@ -69,20 +70,14 @@ class UserService:
             raise HTTPException(status_code=400, detail="Invalid credentials")
 
         access_token_expires = timedelta(minutes=30)
-        access_token = self.create_access_token(
-            data={"user_id": user["user_id"], "role": user["role"]}, 
-            expires_delta=access_token_expires
-        )
+        access_token = self.create_access_token(data={"user_id": user["user_id"], "role": user["role"]}, expires_delta=access_token_expires)
+        
         refresh_token_expires = timedelta(days=7)
-        refresh_token = self.create_access_token(
-            data={"user_id": user["user_id"], "role": user["role"]}, 
-            expires_delta=refresh_token_expires
-        )
+        refresh_token = self.create_access_token(data={"user_id": user["user_id"], "role": user["role"]}, expires_delta=refresh_token_expires)
 
         await update_user_refresh_token(user["email"], refresh_token)
 
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
-            "token_type": "bearer"
         }

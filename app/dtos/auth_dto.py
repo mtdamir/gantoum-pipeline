@@ -2,7 +2,8 @@ from pydantic import BaseModel , Field
 from typing import Optional
 
 class RegisterUserDto(BaseModel):
-    username: str 
+    username: str
+    email: str
     password: str = Field(..., min_length=8)
     phone_number: str 
 
@@ -10,3 +11,4 @@ class RegisterUserDto(BaseModel):
 class LoginUserDto(BaseModel):
     username: str
     password: str = Field(..., min_length=8)
+    phone_number: str 
