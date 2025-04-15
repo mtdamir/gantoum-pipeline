@@ -1,9 +1,9 @@
 **Gantoum Simple Order Management System**
-[Website](https://gantoum.ir/)
+
 
 **Project Overview**
 
-This project is a simple ETL system designed for managing Gantoum products, built using the stack of Airflow, FastAPI, and PostgreSQL. The primary goal of the project is to create an efficient and streamlined platform for handling user orders and automating product data management.
+This project is a simple ETL system designed for managing [Gantoum](https://gantoum.ir/) products, built using the stack of Airflow, FastAPI, and PostgreSQL. The primary goal of the project is to create an efficient and streamlined platform for handling user orders and automating product data management.
 
 The app section consists of a set of RESTful APIs that allow users to register, log into their accounts, and place orders for products using token-based authentication. Data storage is handled by a PostgreSQL database, which includes the users, products, and orders tables.
 
